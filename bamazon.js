@@ -38,7 +38,52 @@ var getProducts = function () {
           res[i].stock_quantity
       );
     }
+    promptCustomer(res);
   });
+};
+
+var promptCustomer = function (res) {
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "choice",
+        message: "What would you like to buy?",
+      },
+    ])
+    .then(function (answer) {
+      for (let i = 0; i < res.length; i++) {
+        if (res[i].product_name === answer.choice) {
+          correct = true;
+          var product = answer.choice;
+          var id = i;
+          inquirer
+            .prompt({
+              type: "input",
+              name: "quantity",
+              message: "How many would you like?",
+              validate: function (value) {
+                if (isNAN(value) === false) {
+                  return true;
+                } else {
+                  return false;
+                }
+              },
+            })
+            .then(function (answer) {
+              if (res[id].stock_quantity - answer.quantity > 0) {
+                  connection.query("'UPDATE products SET stock_quantity='+(res[id].stock_quantity - answer.quantity)+'WHERE product_name='+product+", function (err, res2) {
+                        console.log("Product bought");
+                      getProducts();
+                  }) else {
+                    console.log("there are not enough in stock");
+
+                }
+                }
+            });
+        }
+      }
+    });
 };
 
 // function which prompts the user for what action they should take
